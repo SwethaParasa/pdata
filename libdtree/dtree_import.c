@@ -40,6 +40,7 @@ int dtree_import(const char *dtb_path,
 		 dtree_import_parse_fn parse_fn,
 		 void *priv)
 {
+    fprintf(stderr, "swetha: inside dtree_import\n");
 	struct dtree_import_state state;
 	struct dtm_file *dfile;
 	struct dtm_node *root;
@@ -49,14 +50,16 @@ int dtree_import(const char *dtb_path,
 	dfile = dtm_file_open(dtb_path, true);
 	if (!dfile)
 		return -1;
-
+    fprintf(stderr, "swetha: successfully opened dtb filet\n");
+    
 	root = dtm_file_read(dfile);
 	if (!root)
 		return -2;
-
+    fprintf(stderr, "swetha: read of dtb successful\n");
+    
 	if (!dtree_infodb_load(infodb_path, &infodb))
 		return -3;
-
+    fprintf(stderr, "swetha: infodb loaded successfully\n");
 	state = (struct dtree_import_state) {
 		.dfile = dfile,
 		.infodb = &infodb,
@@ -70,6 +73,7 @@ int dtree_import(const char *dtb_path,
 
 void *dtree_import_root(void *ctx)
 {
+    fprintf(stderr, "swetha: inside dtree_import_root\n");
 	struct dtree_import_state *state = (struct dtree_import_state *)ctx;
 
 	return state->root;
@@ -77,6 +81,7 @@ void *dtree_import_root(void *ctx)
 
 struct dtm_node *dtree_import_node(void *ctx)
 {
+	fprintf(stderr, "swetha: inside dtree_import_node\n");
 	struct dtree_import_state *state = (struct dtree_import_state *)ctx;
 
 	return state->node;
@@ -84,6 +89,7 @@ struct dtm_node *dtree_import_node(void *ctx)
 
 static void dtree_import_free_value(struct dtree_import_state *state)
 {
+	fprintf(stderr, "swetha: inside dtree_import_free_value\n");
 	if (state->value) {
 		dtree_attr_free(state->value);
 		free(state->value);
@@ -93,8 +99,9 @@ static void dtree_import_free_value(struct dtree_import_state *state)
 
 int dtree_import_set_node(struct dtm_node *node, void *ctx)
 {
+	fprintf(stderr, "swetha: inside dtree_import_set_node\n");
 	struct dtree_import_state *state = (struct dtree_import_state *)ctx;
-
+    
 	state->node = node;
 	dtree_import_free_value(state);
 
@@ -103,6 +110,7 @@ int dtree_import_set_node(struct dtm_node *node, void *ctx)
 
 int dtree_import_attr(const char *attr_name, void *ctx, struct dtree_attr **value)
 {
+	fprintf(stderr, "swetha: inside dtree_import_attr\n");
 	struct dtree_import_state *state = (struct dtree_import_state *)ctx;
 	struct dtree_attr *attr;
 	struct dtm_property *prop;
@@ -145,6 +153,7 @@ done:
 
 int dtree_import_attr_update(void *ctx)
 {
+	fprintf(stderr, "swetha: inside dtree_import_attr_update\n");
 	struct dtree_import_state *state = (struct dtree_import_state *)ctx;
 	struct dtm_property *prop;
 	uint8_t *buf;
@@ -152,26 +161,43 @@ int dtree_import_attr_update(void *ctx)
 	bool ok;
 
 	if (!state->node)
-		return -1;
+	{
+		fprintf(stderr, "swetha: failed at state->node\n");
+		return 0;
+	}
 
 	if (!state->value)
-		return -1;
+	{
+		fprintf(stderr, "swetha: failed at state->node->value\n");
+		return 0;
+	}
 
 	state->count += 1;
 	if (state->count < state->value->count)
+	{
+		//fprintf(stderr, "swetha: failed at state->count: %d and state->value->count: %d\n",state->count,state->value->count);
 		return 0;
+	}
 
 	prop = dtm_node_get_property(state->node, state->value->name);
+	
 	if (!prop)
-		return -1;
-
+	{
+		fprintf(stderr, "swetha: property: %s not found\n",state->value->name);
+		return 0;
+	}
+    
 	dtree_attr_encode(state->value, &buf, &len);
 	dtm_prop_set_value(prop, buf, len);
+	fprintf(stderr, "swetha: property: %s and value : %s\n",state->value->name,buf);
 	free(buf);
 
 	ok = dtm_file_update_node(state->dfile, state->node, state->value->name);
 	if (!ok)
-		return -1;
+	{
+		fprintf(stderr, "swetha: ok failed");
+		return 0;
+	}
 
 	return 0;
 }

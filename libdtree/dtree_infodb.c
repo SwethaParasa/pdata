@@ -340,19 +340,19 @@ bool dtree_infodb_load(const char *filename, struct dtree_infodb *infodb)
 	rc = dtree_infodb_read_all(fp, infodb);
 	if (!rc)
 		goto done;
-
+	fprintf(stderr, "swetha: dtree_infodb_read_all success\n");
 	rc = dtree_infodb_read_attr(fp, infodb);
 	if (!rc)
 		goto done;
-
+    fprintf(stderr, "swetha: dtree_infodb_read_attr success\n");
 	rc = dtree_infodb_read_targets(fp, infodb);
 	if (!rc)
 		goto done;
-
+    fprintf(stderr, "swetha: dtree_infodb_read_targets success\n");
 	rc = dtree_infodb_read_target(fp, infodb);
 	if (!rc)
 		goto done;
-
+    fprintf(stderr, "swetha: dtree_infodb_read_target success\n");
 done:
 	fclose(fp);
 	return rc;

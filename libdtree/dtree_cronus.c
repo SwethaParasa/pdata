@@ -79,6 +79,7 @@ struct cronus_import_state {
 
 int cronus_import_parse(void *ctx, void *priv)
 {
+	fprintf(stderr, "swetha: inside cronus_import_parse\n");
 	struct cronus_import_state *state = (struct cronus_import_state *)priv;
 	char *buf;
 	size_t len;
@@ -111,7 +112,7 @@ int dtree_cronus_import(const char *dtb_path,
 	state = (struct cronus_import_state) {
 		.fp = fp,
 	};
-
+    fprintf(stderr, "swetha: inside dtree_cronus_import\n");
 	return dtree_import(dtb_path, infodb_path, cronus_import_parse, &state);
 }
 

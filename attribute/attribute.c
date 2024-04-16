@@ -128,11 +128,12 @@ static int do_import(const char *dtb, const char *infodb, const char *dump_file)
 	int ret;
 
 	fp = fopen(dump_file, "r");
+	fprintf(stderr, "swetha: Trying to open cronus dump file %s\n", dump_file);
 	if (!fp) {
 		fprintf(stderr, "Failed to open cronus dump file %s\n", dump_file);
 		return 1;
 	}
-
+    fprintf(stderr, "swetha: Successfully opened cronus dump file %s\n", dump_file);
 	ret = dtree_cronus_import(dtb, infodb, fp);
 	fclose(fp);
 	return ret;
